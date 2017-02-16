@@ -9,7 +9,7 @@
 # 
 # 
 
-# In[34]:
+# In[1]:
 
 get_ipython().magic('matplotlib inline')
 get_ipython().magic("config InlineBackend.figure_format = 'retina'")
@@ -23,14 +23,14 @@ import matplotlib.pyplot as plt
 # 
 # A critical step in working with neural networks is preparing the data correctly. Variables on different scales make it difficult for the network to efficiently learn the correct weights. Below, we've written the code to load and prepare the data. You'll learn more about this soon!
 
-# In[35]:
+# In[2]:
 
 data_path = 'Bike-Sharing-Dataset/hour.csv'
 
 rides = pd.read_csv(data_path)
 
 
-# In[36]:
+# In[3]:
 
 rides.head()
 
@@ -41,7 +41,7 @@ rides.head()
 # 
 # Below is a plot showing the number of bike riders over the first 10 days in the data set. You can see the hourly rentals here. This data is pretty complicated! The weekends have lower over all ridership and there are spikes when people are biking to and from work during the week. Looking at the data above, we also have information about temperature, humidity, and windspeed, all of these likely affecting the number of riders. You'll be trying to capture all this with your model.
 
-# In[37]:
+# In[4]:
 
 rides[:24*10].plot(x='dteday', y='cnt')
 
@@ -49,7 +49,7 @@ rides[:24*10].plot(x='dteday', y='cnt')
 # ### Dummy variables
 # Here we have some categorical variables like season, weather, month. To include these in our model, we'll need to make binary dummy variables. This is simple to do with Pandas thanks to `get_dummies()`.
 
-# In[38]:
+# In[5]:
 
 dummy_fields = ['season', 'weathersit', 'mnth', 'hr', 'weekday']
 for each in dummy_fields:
@@ -67,7 +67,7 @@ data.head()
 # 
 # The scaling factors are saved so we can go backwards when we use the network for predictions.
 
-# In[39]:
+# In[6]:
 
 quant_features = ['casual', 'registered', 'cnt', 'temp', 'hum', 'windspeed']
 # Store scalings in a dictionary so we can convert back later
@@ -82,7 +82,7 @@ for each in quant_features:
 # 
 # We'll save the last 21 days of the data to use as a test set after we've trained the network. We'll use this set to make predictions and compare them with the actual number of riders.
 
-# In[40]:
+# In[7]:
 
 # Save the last 21 days 
 test_data = data[-21*24:]
@@ -96,7 +96,7 @@ test_features, test_targets = test_data.drop(target_fields, axis=1), test_data[t
 
 # We'll split the data into two sets, one for training and one for validating as the network is being trained. It's important to split the data randomly so all cases are represented in both sets.
 
-# In[41]:
+# In[8]:
 
 n_records = features.shape[0]
 split = np.random.choice(features.index, 
@@ -123,7 +123,7 @@ val_features, val_targets = features.drop(split), targets.drop(split)
 # 4. Implement the forward pass in the `run` method.
 #   
 
-# In[42]:
+# In[9]:
 
 class NeuralNetwork:
     def __init__(self, input_nodes, hidden_nodes, output_nodes, learning_rate):
@@ -173,6 +173,7 @@ class NeuralNetwork:
         
         # TODO: Update the weights
         self.weights_hidden_to_output += self.learning_rate * np.dot(output_errors, hidden_outputs.T)
+        
         self.weights_input_to_hidden += self.learning_rate * np.dot(hidden_errors * hidden_grad, inputs.T)
         
     def run(self, inputs_list):
@@ -191,7 +192,7 @@ class NeuralNetwork:
         return final_outputs
 
 
-# In[43]:
+# In[10]:
 
 def MSE(y, Y):
     return np.mean((y-Y)**2)
@@ -210,12 +211,12 @@ def MSE(y, Y):
 # ### Choose the number of hidden nodes
 # The more hidden nodes you have, the more accurate predictions the model will make. Try a few different numbers and see how it affects the performance. You can look at the losses dictionary for a metric of the network performance. If the number of hidden units is too low, then the model won't have enough space to learn and if it is too high there are too many options for the direction that the learning can take. The trick here is to find the right balance in number of hidden units you choose.
 
-# In[44]:
+# In[11]:
 
 ### Set the hyperparameters here ###
-epochs = 5000
-learning_rate = 0.005
-hidden_nodes = 25
+epochs = 500
+learning_rate = 0.2
+hidden_nodes = 12
 output_nodes = 1
 
 N_i = train_features.shape[1]
@@ -242,8 +243,9 @@ for e in range(epochs):
         
 
 
-# In[45]:
+# In[17]:
 
+plt.figure(figsize=(12,4))
 plt.plot(losses['train'], label='Training loss')
 plt.plot(losses['validation'], label='Validation loss')
 plt.legend()
@@ -253,7 +255,7 @@ plt.legend()
 # 
 # Here, use the test data to check that network is accurately making predictions. If your predictions don't match the data, try adjusting the hyperparameters and check to make sure the forward passes in the network are correct.
 
-# In[46]:
+# In[18]:
 
 fig, ax = plt.subplots(figsize=(12,4))
 
@@ -278,15 +280,14 @@ _ = ax.set_xticklabels(dates[12::24], rotation=45)
 # 
 # #### Your answer below
 # 
-# My model does a very good job of predicting the number of riders, for the most part. We could divide its success into two parts, up to and including, December 21, and after December 21. Up to this date, my model appears to be very accurate. However, after this day, the accuracy drops. I expect that the accuracy drops because we only have two years of data, and the training data includes the testing dates (December 11 - December 31) only once. Predicting values is more difficult when you have only seen the data once, as it is harder to find a pattern. In addition, we would consider December 22 to December 31 the holiday season. During this time, ridership differs compared to normal, making it even more difficult to predict the data correctly.
-# 
+# My model does a very good job of predicting the number of riders, for the most part. We could divide its success into two parts, up to and including, December 21, and after December 21. Up to this date, my model appears to be very accurate. However, after this day, the accuracy drops. I expect that the accuracy drops because we only have two years of data, and the training data includes the testing dates (December 11 - December 31) only once. Predicting values is more difficult when you have only seen the data once, as it is harder to find a pattern, thus more data would very likely improve predictions. In addition, we would consider December 22 to December 31 the holiday season. During this time, ridership differs compared to normal, making it even more difficult to predict the data correctly. If we had additional features in this data, such as 'adjacent_holiday' (for days before and after holidays), this could help my neural network to understand the data better and improve its performance.
 # 
 
 # ## Unit tests
 # 
 # Run these unit tests to check the correctness of your network implementation. These tests must all be successful to pass the project.
 
-# In[47]:
+# In[19]:
 
 import unittest
 
