@@ -1,11 +1,10 @@
 # First-Neural-Network
-The first project in my Deep Learning Nanodegree (Udacity). Built a neural network using numpy.
 
-Feel free to view the project in any of the three file types (.ipynb should be the most simple, just click on its link).
+This is the first project of my Deep Learning Nanodegree Foundation (Udacity). Using Numpy, I build a neural network that could predict the daily ridership of a bike sharing service.
+
+To view my project most easily, click on the .ipynb link.
 
 day.csv contains the ridership data on a daily basis.
-
 hour.csv contains the ridership data on an hourly basis.
-
 
 More information about the project can be found in Project_Description.txt.
